@@ -78,7 +78,7 @@ namespace Nop.Plugin.DiscountRules.HasCategory.Controllers
             //set the HTML field prefix
             ViewData.TemplateInfo.HtmlFieldPrefix = string.Format(DiscountRequirementDefaults.HTML_FIELD_PREFIX, discountRequirementId ?? 0);
 
-            return View("~/Plugins/DiscountRules.HasOneCategory/Views/Configure.cshtml", model);
+            return View("~/Plugins/DiscountRules.HasCategory/Views/Configure.cshtml", model);
         }
 
         [HttpPost]
@@ -126,7 +126,7 @@ namespace Nop.Plugin.DiscountRules.HasCategory.Controllers
             //prepare model
             var model = await _categoryModelFactory.PrepareCategorySearchModelAsync(new CategorySearchModel());
 
-            return View("~/Plugins/DiscountRules.HasOneCategory/Views/CategoryAddPopup.cshtml", model);
+            return View("~/Plugins/DiscountRules.HasCategory/Views/CategoryAddPopup.cshtml", model);
         }
 
         [HttpPost]
