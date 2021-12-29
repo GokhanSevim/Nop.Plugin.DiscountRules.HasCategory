@@ -1,0 +1,128 @@
+﻿@model CategorySearchModel
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminPopupLayout.cshtml";
+}
+
+@{
+    const string hideSearchBlockAttributeName = "CategoryAddPopup.HideSearchBlock";
+    var hideSearchBlock = await genericAttributeService.GetAttributeAsync<bool>(await workContext.GetCurrentCustomerAsync(), hideSearchBlockAttributeName);
+
+    //page title
+    ViewBag.Title = T("Plugins.DiscountRules.HasCategory.Fields.Categories.Choose").Text;
+}
+<nop-antiforgery-token />
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        @T("Plugins.DiscountRules.HasCategory.Fields.Categories.Choose")
+    </h1>
+    <div class="pull-right">
+        &nbsp;
+    </div>
+</div>
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="cards-group">
+            <div class="card card-default card-search">
+                <div class="card-body">
+                    <div class="row search-row @(!hideSearchBlock ? "opened" : "")" data-hideAttribute="@hideSearchBlockAttributeName">
+                        <div class="search-text">@T("Admin.Common.Search")</div>
+                        <div class="icon-search"><i class="fa fa-search" aria-hidden="true"></i></div>
+                        <div class="icon-collapse"><i class="fa fa-angle-down" aria-hidden="true"></i></div>
+                    </div>
+
+                    <div class="search-body @(hideSearchBlock ? "closed" : "")">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group row">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="SearchCategoryName" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="SearchCategoryName" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="form-group row" @(Model.HideStoresList ? Html.Raw("style=\"display:none\"") : null)>
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="SearchStoreId" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-select asp-for="SearchStoreId" asp-items="Model.AvailableStores" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="text-center col-12">
+                                <button type="button" id="search-categorys" class="btn btn-primary btn-search">
+                                    <i class="fa fa-search"></i>
+                                    @T("Admin.Common.Search")
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card card-default">
+                <div class="card-body">
+                    @await Html.PartialAsync("Table", new DataTablesModel
+                    {
+                        Name = "categories-grid",
+                        UrlRead = new DataUrl("List", "Category", null),
+                        SearchButtonId = "search-categories",
+                        Length = Model.PageSize,
+                        LengthMenu = Model.AvailablePageSizes,
+                        Filters = new List<FilterParameter>
+                            {
+                                new FilterParameter(nameof(Model.SearchCategoryName)),
+                                new FilterParameter(nameof(Model.SearchStoreId)),
+                            },
+                        ColumnCollection = new List<ColumnProperty>
+                            {
+                                new ColumnProperty(nameof(CategoryModel.Id))
+                                {
+                                    Title = T("Admin.Common.Select").Text,
+                                    Width = "50",
+                                    Render = new RenderButtonCustom(NopButtonClassDefaults.Default, T("Admin.Common.Select").Text)
+                                    {
+                                        OnClickFunctionName = "selectRequiredCategory"
+                                    }
+                                },
+                                new ColumnProperty(nameof(CategoryModel.Name))
+                                {
+                                    Title = T("Admin.Catalog.Categories.Fields.Name").Text,
+                                    Width = "50"
+                                },
+                                new ColumnProperty(nameof(CategoryModel.Published))
+                                {
+                                    Title = T("Admin.Catalog.Categories.Fields.Published").Text,
+                                    Width = "100",
+                                    ClassName =  NopColumnClassDefaults.CenterAll,
+                                    Render = new RenderBoolean()
+                                }
+                            }
+                    })
+
+                    <script>
+                            function selectRequiredCategory(categoryid) {
+                                try {
+                                    var currentValue = window.opener.document.getElementById('@(Context.Request.Query["categoryIdsInput"])').value;
+                                    if (currentValue) {
+                                        //add comma
+                                        window.opener.document.getElementById('@(Context.Request.Query["categoryIdsInput"])').value += ', ';
+                                    }
+                                    window.opener.document.getElementById('@(Context.Request.Query["categoryIdsInput"])').value += categoryid;
+                                    window.opener.document.getElementById('@(Context.Request.Query["btnId"])').click();
+                                }
+                                catch (e){}
+                                window.close();
+                            }
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
